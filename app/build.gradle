@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13' // Version correcte du plugin JavaFX
+    id 'org.beryx.jlink' version '2.24.4'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.openjfx:javafx-controls:21'
+    implementation 'org.openjfx:javafx-fxml:21'
+}
+
+application {
+    mainClass = 'to_do_list_java.TaskManagerApp'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+javafx {
+    version = "23.0.2"  // Assurez-vous d'utiliser une version compatible avec JavaFX
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+tasks.named('run') {
+    doFirst {
+        jvmArgs = [
+            '--module-path', configurations.runtimeClasspath.asPath,
+            '--add-modules', 'javafx.controls,javafx.fxml',
+            '--add-opens', 'javafx.graphics/javafx.scene=ALL-UNNAMED'
+        ]
+    }
+}
+
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'hellofx'
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED")
+}
+
